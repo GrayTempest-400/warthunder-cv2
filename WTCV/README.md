@@ -1,9 +1,9 @@
 ```
 在thank文件夹内放入有坦克和没坦克的正负样本图片（have_thank,no_thank)
 
-1，运行完run.py后cmd在正样本和负样本中cmd 分别输入dir /b/s/p/w *.jpg > have_mask.txt 创建路径文件
+1，运行完run.py后cmd在正样本和负样本中cmd 分别输入dir /b/s/p/w *.jpg > have_thank.txt 创建路径文件
 
-2， 此时在have_thank下就会产生一个have_than.txt文件，并将其放到上一层目录,no_thank也相同
+2， 此时在have_thank下就会产生一个have_thank.txt文件，并将其放到上一层目录,no_thank也相同
 
 3,运行run2.py
 
