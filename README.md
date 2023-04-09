@@ -17,3 +17,5 @@ pause得到havethank.vec文件
 6,修改文件名为start.bat并运行
 
 7，训练完成后在xml文件下即可看到以下文件，第一个文件即为我们训练好的分类器
+
+运行warthunder_findthank实现opencv捕获一个名为'War Thunder'窗口中的图片，并框选分类器分类出的内容
