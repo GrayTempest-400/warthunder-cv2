@@ -1,6 +1,6 @@
 # warthunder-cv2
 战争雷霆坦克训练器
-在have_thank文件夹正样本no_负样本
+在have_thank文件夹正样本no_thank负样本
 
 1，运行完run.py后cmd在正样本和负样本中cmd 分别输入dir /b/s/p/w *.jpg > have_mask.txt 创建路径文件
 
