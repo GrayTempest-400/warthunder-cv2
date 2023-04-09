@@ -9,7 +9,7 @@
 
 4,创建xml放置训练好的模型
 
-5,在thank文件夹cmd运行opencv_createsamples.exe -vec havethank.vec -info have_mask.txt -num 400 -w 20 -h 20
+5,在thank文件夹cmd运行opencv_createsamples.exe -vec havethank.vec -info have_thank.txt -num 400 -w 20 -h 20
 
 pause得到havethank.vec文件
 
