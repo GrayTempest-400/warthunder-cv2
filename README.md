@@ -14,7 +14,7 @@
 
 pause得到havethank.vec文件
 
-6,修改文件名为start.bat并运行
+6,继续运行cmd .\opencv_traincascade.exe  -data xml -vec havethank.vec -bg have_thank.txt-numPos 1500 -numNeg 1169 -numStages 20 -featureType HAAR -w 20 -h 20
 
 7，训练完成后在xml文件下即可看到以下文件，第一个文件即为我们训练好的分类器
 
