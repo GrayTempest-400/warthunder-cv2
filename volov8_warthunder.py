@@ -3,7 +3,7 @@ import win32con
 import win32gui
 import numpy as np
 from PIL import ImageGrab
-from volov8 import Detector
+from yolov8 import Detector
 import cv2
 
 
