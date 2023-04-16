@@ -19,3 +19,8 @@ pause得到havethank.vec文件
 7，训练完成后在xml文件下即可看到以下文件，第一个文件即为我们训练好的分类器
 
 运行warthunder_findthank实现opencv捕获一个名为'War Thunder'窗口中的图片，并框选分类器分类出的内容
+ 
+ 
+ 
+ 新增yolov5功能
+ 只需要在warthunder_yolov5文件夹内填写你训练出的训练集即可
