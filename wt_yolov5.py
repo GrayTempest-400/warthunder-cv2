@@ -215,7 +215,7 @@ def loop(data):
             target = follow(aims)
            #敌我识别
             y = sy + 50
-            x = sx
+            x = sx + 100
 
 
 
