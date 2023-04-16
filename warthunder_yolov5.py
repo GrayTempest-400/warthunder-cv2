@@ -1,7 +1,7 @@
 # 这里是导入依赖，需要这些库
 import ctypes
 import math
-
+import win32gui
 import mss.tools
 import torch
 from pynput.mouse import Controller
@@ -27,9 +27,10 @@ class Line(Point):
     def getlen(self):
         return math.sqrt(math.pow((self.x1 - self.x2), 2) + math.pow((self.y1 - self.y2), 2))
 
-
+hwnd = win32gui.FindWindow(None, "War Thunder")
 # 加载本地模型
-device = torch.device("cuda")
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+half = device != 'cpu'
 model = torch.hub.load('D:/Users/20064/PycharmProjects/yolov5-02', 'custom',
                        'D:/Users/20064/PycharmProjects/yolov5-02/runs/train/exp4/weights/best.pt',
                        source='local', force_reload=False)
@@ -148,7 +149,8 @@ while True:
                         driver.moveR(int(xyItem[0] - xyItem[2]),
                                      int(xyItem[1] - xyItem[3]), True)
                         pyautogui.keyDown('shift + x')  # 改为你自己的测距按键，需激光测距+自动装表
-                        pyautogui.click()
+                        driver.moveR(int(xyItem[0] - xyItem[2]),
+                                     int(xyItem[1] - xyItem[3]), True)
                     break
 
 
