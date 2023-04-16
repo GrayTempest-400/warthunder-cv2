@@ -23,4 +23,4 @@ pause得到havethank.vec文件
  
  
  新增yolov5功能
- 只需要在warthunder_yolov5文件夹内填写你训练出的训练集即可
+ 只需要在warthunder_yolov5.py内填写你训练出的训练集即可
