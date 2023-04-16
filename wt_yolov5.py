@@ -211,9 +211,11 @@ def loop(data):
             t3 = time.perf_counter_ns()
             aims = detector.convert(aims=aims, region=data[region])  # 将截图坐标系转换为屏幕坐标系
             # print(f'{Timer.cost(t3 - t1)}, {Timer.cost(t2 - t1)}, {Timer.cost(t3 - t2)}')
-            #敌我识别
-            y = [i[1] for i in aims] + 50
-            x = [i[0] for i in aims]
+            # 找到目标
+            target = follow(aims)
+           #敌我识别
+            y = [i[1] for i in target] + 50
+            x = [i[0] for i in target]
 
 
 
@@ -223,7 +225,7 @@ def loop(data):
                 cv2.waitKey(0)
                 cv2.destoryAllWindows()
 
-            image = cv2.imread('wtbg.png')
+            image = cv2.imread('img')
             # 定义矩形坐标
             x, y, w, h = y, x, 100, 100
 
@@ -246,15 +248,7 @@ def loop(data):
             res_pink = cv2.bitwise_and(img, img, mask=mask_pink)
 
             # 如果检测到蓝色或粉色，则打印“teammate”
-            if (cv2.countNonZero(mask_blue) > 0) or (cv2.countNonZero(mask_pink) > 0):
-                print("teammate")
-
-
-            # 找到目标
-            target = follow(aims)
-
-            # 移动准星
-            if data[lock] and target and (cv2.countNonZero(mask_blue) > 0) or (cv2.countNonZero(mask_pink) > 0):
+            if (cv2.countNonZero(mask_blue) > 0) or (cv2.countNonZero(mask_pink) > 0)and data[lock] and target :
                 index, clazz, conf, sc, gc, sr, gr = target
                 if inner(sc):
                     cx, cy = data[center]
