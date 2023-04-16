@@ -214,8 +214,8 @@ def loop(data):
             # 找到目标
             target = follow(aims)
            #敌我识别
-            y = [i[1] for i in target] + 50
-            x = [i[0] for i in target]
+            y = sy + 50
+            x = sx
 
 
 
@@ -247,7 +247,7 @@ def loop(data):
             res_blue = cv2.bitwise_and(img, img, mask=mask_blue)
             res_pink = cv2.bitwise_and(img, img, mask=mask_pink)
 
-            # 如果检测到蓝色或粉色，则打印“teammate”
+            # 如果检测到蓝色或粉色
             if (cv2.countNonZero(mask_blue) > 0) or (cv2.countNonZero(mask_pink) > 0)and data[lock] and target :
                 index, clazz, conf, sc, gc, sr, gr = target
                 if inner(sc):
