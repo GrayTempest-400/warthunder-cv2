@@ -8,9 +8,16 @@ from pynput.mouse import Button
 from pynput.keyboard import Key, Listener
 from win32gui import FindWindow, SetWindowPos, GetWindowText, GetForegroundWindow
 from win32con import HWND_TOPMOST, SWP_NOMOVE, SWP_NOSIZE
+import win32gui, win32ui, win32con, win32api
 import winsound
 from simple_pid import PID
 import numpy as np
+from yolov5.utils.general import non_max_suppression
+import torch
+
+
+
+
 
 ads = 'ads'
 pidc = 'pidc'
@@ -47,6 +54,7 @@ init = {
     left: False,  # 左键锁, Left, 按鼠标左键时锁
     debug: False,  # Debug 模式, 用来调试 PID 值
 }
+
 
 
 def game():
@@ -193,7 +201,8 @@ def loop(data):
     text = 'Realtime Screen Capture Detect'
     pidx = PID(2, 0, 0.02, setpoint=0)
 
-    # 主循环
+
+# 主循环
     while True:
         try:
 
@@ -202,8 +211,9 @@ def loop(data):
 
             # 生产数据
             t1 = time.perf_counter_ns()
-            img = capturer
 
+            t1 = time.perf_counter_ns()
+            img = capturer.grab()
             # img = Capturer.backup(data[region])  # 如果句柄截图是黑色, 不能正常使用, 可以使用本行的截图方法
 
             t2 = time.perf_counter_ns()
@@ -214,41 +224,57 @@ def loop(data):
             # 找到目标
             target = follow(aims)
            #敌我识别
-            y = sy + 50
-            x = sx + 100
 
 
+            img = cv2.imread(img)
 
 
-            def cv_show(name, image):
-                cv2.imshow(name, image)
-                cv2.waitKey(0)
-                cv2.destoryAllWindows()
+            # 将图像转换为RGB格式
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-            image = cv2.imread('img')
-            # 定义矩形坐标
-            x, y, w, h = y, x, 100, 100
+            # 进行推理
+            results = detector.detect(img)          #这段可能还有问题，考完试回来改
 
-            # 从图像中提取矩形区域
-            roi = img[y:y + h, x:x + w]
+            # 非极大值抑制
+            results = non_max_suppression(results)
+
+            # 处理模型输出以获取每个检测到的目标的边界框坐标
+            for result in results:
+                for target in result:
+                    x1, y1, x2, y2 = target[:4]
+                    print(f'目标位置：({x1}, {y1}), ({x2}, {y2})')
+
+            # 将图像转换为HSV颜色空间
             hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
+            # 定义蓝色和绿色的HSV范围
             lower_blue = np.array([110, 50, 50])
             upper_blue = np.array([130, 255, 255])
+            lower_green = np.array([50, 50, 50])
+            upper_green = np.array([70, 255, 255])
 
-            # 定义HSV中粉色的范围
-            lower_pink = np.array([140, 150, 0])
-            upper_pink = np.array([180, 255, 255])
+            # 获取box的位置和大小
+            x1, y1, x2, y2 = target[:, 0], target[:, 1], target[:, 2], target[:, 3]
+            cx = (x1 + x2) / 2
+            cy = (y1 + y2) / 2
+            w = x2 - x1
+            h = y2 - y1
+            target = torch.stack((cx, cy, w, h), axis=-1)
 
-            # 对HSV图像进行阈值处理，以获取仅蓝色和粉色的颜色
-            mask_blue = cv2.inRange(hsv, lower_blue, upper_blue)
-            mask_pink = cv2.inRange(hsv, lower_pink, upper_pink)
+            x, y, w, h = (cx, cy, w, h)   #这段可能还有问题
 
-            # 对掩模和原始图像进行按位与操作
-            res_blue = cv2.bitwise_and(img, img, mask=mask_blue)
-            res_pink = cv2.bitwise_and(img, img, mask=mask_pink)
+            # 获取box上方100个距离内的区域
+            roi = img[y - 100:y, x:x + w]
+
+            # 将区域转换为HSV颜色空间
+            hsv_roi = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
+
+            # 创建掩膜
+            mask_roi_blue = cv2.inRange(hsv_roi, lower_blue, upper_blue)
+            mask_roi_green = cv2.inRange(hsv_roi, lower_green, upper_green)
 
             # 如果检测到蓝色或粉色
-            if (cv2.countNonZero(mask_blue) > 0) or (cv2.countNonZero(mask_pink) > 0)and data[lock] and target :
+            if (cv2.countNonZero(mask_roi_blue) == 0) or (cv2.countNonZero(mask_roi_green) == 0)and data[lock] and target :
                 index, clazz, conf, sc, gc, sr, gr = target
                 if inner(sc):
                     cx, cy = data[center]
@@ -264,7 +290,7 @@ def loop(data):
                         move(ax, ay)
 
             # 显示检测
-            if data[show] and img is not None and (cv2.countNonZero(mask_blue) > 0) or (cv2.countNonZero(mask_pink) > 0):
+            if data[show] and img is not None and (cv2.countNonZero(mask_roi_blue) > 0) or (cv2.countNonZero(mask_roi_green) > 0):
                 # 记录耗时
                 cv2.putText(img, f'{Timer.cost(t3 - t1)}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (255, 255, 255), 1)
                 cv2.putText(img, f'{Timer.cost(t2 - t1)}', (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (255, 255, 255), 1)
@@ -285,6 +311,8 @@ def loop(data):
 
         except:
             pass
+
+        #自动运行
 
 
 if __name__ == '__main__':
