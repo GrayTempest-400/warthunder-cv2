@@ -3,7 +3,7 @@ import multiprocessing
 import time
 from multiprocessing import Process
 import cv2
-import pynput
+import  pynput
 from pynput.mouse import Button
 from pynput.keyboard import Key, Listener
 from win32gui import FindWindow, SetWindowPos, GetWindowText, GetForegroundWindow
@@ -37,9 +37,9 @@ classes = 'classes'
 confidence = 'confidence'
 
 init = {
-    title: 'Apex Legends',  # 可在后台运行 print(GetWindowText(GetForegroundWindow())) 来检测前台游戏窗体标题
+    title: '必应 - 个人 - Microsoft Edge Dev',  # 可在后台运行 print(GetWindowText(GetForegroundWindow())) 来检测前台游戏窗体标题
     weights: 'weights.apex.private.crony.1435244588.1127E7B7107206013DE38A10EDDEEEB3-v5-n-416-50000-3-0.1.2.engine',
-    classes: 0,  # 要检测的标签的序号(标签序号从0开始), 多个时如右 [0, 1]
+    classes: 3,  # 要检测的标签的序号(标签序号从0开始), 多个时如右 [0, 1]
     confidence: 0.5,  # 置信度, 低于该值的认为是干扰
     size: 320,  # 截图的尺寸, 屏幕中心 size*size 大小
     radius: 160,  # 瞄准生效半径, 目标瞄点出现在以准星为圆心该值为半径的圆的范围内时才会锁定目标
@@ -156,6 +156,7 @@ def loop(data):
         x, y = point
         return (x - a) ** 2 + (y - b) ** 2 < data[radius] ** 2
 
+
     def follow(aims):            #此代码是一个 Python 函数，它将目标列表作为输入，并返回距离 circle1 中心最近的目标。该函数首先过滤掉置信水平低于特定阈值1的目标。然后，它通过计算每个目标的瞄准点来调整其
 #根据它们在图像中的高度和位置的近似位置1。最后，它使用勾股定理1计算每个目标的目标点与圆心之间的距离。然后返回距离最小的目标1。
 
@@ -182,21 +183,23 @@ def loop(data):
             return None
 
         # 找到目标
-        cx, cy = data[center]                               #该函数返回一个元组，其中包含最接近所有目标中心点的目标对象及其关联的元数据1。
-        index = 0
+        cx, cy = data[center]      # 从输入参数中获取所有目标的中心点                         #该函数返回一个元组，其中包含最接近所有目标中心点的目标对象及其关联的元数据1。
+        index = 0  # 初始化变量
         minimum = 0
-        for i, item in enumerate(targets):
-            index, clazz, conf, sc, gc, sr, gr = item
+        for i, item in enumerate(targets):      # 遍历所有目标
+            index, clazz, conf, sc, gc, sr, gr = item      # 获取目标相关信息
             sx, sy = sc
-            distance = (sx - cx) ** 2 + (sy - cy) ** 2
-            if minimum == 0:
+            distance = (sx - cx) ** 2 + (sy - cy) ** 2      # 计算距离
+            if minimum == 0:               # 如果是第一个目标，则将其设置为最小值
                 index = i
                 minimum = distance
-            else:
+            else:                               # 如果当前距离比最小值小，则更新最小值和索引
                 if distance < minimum:
                     index = i
                     minimum = distance
         return targets[index]
+
+                                                             # 返回距离最小的目标及其相关元数据
 
     text = 'Realtime Screen Capture Detect'
     pidx = PID(2, 0, 0.02, setpoint=0)
@@ -220,7 +223,7 @@ def loop(data):
             aims, img = detector.detect(image=img, show=data[show])  # 目标检测, 得到截图坐标系内识别到的目标和标注好的图片(无需展示图片时img为none)
             t3 = time.perf_counter_ns()
             aims = detector.convert(aims=aims, region=data[region])  # 将截图坐标系转换为屏幕坐标系
-            # print(f'{Timer.cost(t3 - t1)}, {Timer.cost(t2 - t1)}, {Timer.cost(t3 - t2)}')
+            print(f'{aims}')
             # 找到目标
             target = follow(aims)
            #敌我识别
@@ -232,17 +235,7 @@ def loop(data):
             # 将图像转换为RGB格式
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-            # 进行推理
-            results = detector.detect(img)          #这段可能还有问题，考完试回来改
 
-            # 非极大值抑制
-            results = non_max_suppression(results)
-
-            # 处理模型输出以获取每个检测到的目标的边界框坐标
-            for result in results:
-                for target in result:
-                    x1, y1, x2, y2 = target[:4]
-                    print(f'目标位置：({x1}, {y1}), ({x2}, {y2})')
 
             # 将图像转换为HSV颜色空间
             hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -254,12 +247,13 @@ def loop(data):
             upper_green = np.array([70, 255, 255])
 
             # 获取box的位置和大小
-            x1, y1, x2, y2 = target[:, 0], target[:, 1], target[:, 2], target[:, 3]
+            x1 = target[3][0],y1 = target[3][1],x2 = target[3][2],y2 = target[3][3]
             cx = (x1 + x2) / 2
             cy = (y1 + y2) / 2
             w = x2 - x1
             h = y2 - y1
             target = torch.stack((cx, cy, w, h), axis=-1)
+            print(f'{x1},{y1},{x2},{y2}')
 
             x, y, w, h = (cx, cy, w, h)   #这段可能还有问题
 
