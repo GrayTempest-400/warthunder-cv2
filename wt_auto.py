@@ -215,8 +215,8 @@ def loop(data):
                     im = np.array(im)
                     im = cv2.cvtColor(im, cv2.COLOR_RGB2BGR)
 
-                    lower_green = np.array([34 255, 0])   #你自己设置的小队队友ROG颜色
-                    upper_green = np.array([34 255, 0])
+                    lower_green = np.array([34, 255, 0])   #你自己设置的小队队友ROG颜色
+                    upper_green = np.array([34, 255, 0])
                     mask_green = cv2.inRange(im, lower_green, upper_green)
 
                     lower_blue = np.array([54, 83, 179])     #你自己设置的队友ROG颜色
