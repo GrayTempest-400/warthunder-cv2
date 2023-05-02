@@ -47,3 +47,4 @@ mss
 pynput
 pywin32
 simple-pid
+pillow
