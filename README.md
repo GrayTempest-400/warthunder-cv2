@@ -1,6 +1,6 @@
 # 说明(一定要打开源码看注释！！！）
-#没有训练集，还没训练集不能检测出坦克！！！
-#用person测试的
+# 没有训练集，还没训练集不能检测出坦克！！！
+# 用person测试的
 ![%6WRE61M5EG E@9H7`SNWO5](https://user-images.githubusercontent.com/101955396/235575092-137cb391-bc70-4897-9cac-92996a9178ff.png)
 能拉枪指到人
 ![123](https://user-images.githubusercontent.com/101955396/235645757-c2a182b0-4031-4be2-93df-9b004d4d2f46.png)
