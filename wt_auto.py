@@ -31,7 +31,7 @@ classes = 'classes'
 confidence = 'confidence'
 
 init = {
-    title: 'War Thunder ',  # 可在后台运行 print(GetWindowText(GetForegroundWindow())) 来检测前台游戏窗体标题
+    title: ' ',  # 可在后台运行 print(GetWindowText(GetForegroundWindow())) 来检测前台游戏窗体标题
     weights: 'yolov5s.pt',      #我还没训练，训练好了可再转为.engine #weights: '你训练的.engine'
     classes: 0,  # 要检测的标签的序号(标签序号从0开始), 多个时如右 [0, 1] #0是检测person，1是检测tank详情见date/coco128.yaml
     confidence: 0.5,  # 置信度, 低于该值的认为是干扰
@@ -185,8 +185,8 @@ def loop(data):
 
             # 生产数据
             t1 = time.perf_counter_ns()
-            img = capturer.grab()
-            #img = Capturer.backup(data[region])  # 如果句柄截图是黑色, 不能正常使用, 可以使用本行的截图方法
+
+            img = Capturer.backup(data[region])  # 如果句柄截图是黑色, 不能正常使用, 可以使用本行的截图方法
             t2 = time.perf_counter_ns()
             aims, img = detector.detect(image=img, show=data[show])  # 目标检测, 得到截图坐标系内识别到的目标和标注好的图片(无需展示图片时img为none)
             t3 = time.perf_counter_ns()
@@ -204,26 +204,31 @@ def loop(data):
                     sx, sy = sc
                     x = sx - cx
                     y = sy - cy
-                    box = (sr[0],sr[1]-100,sr[2]+sr[0],sr[3]+sr[1])   #检测敌友颜色框大小，sr是离准星最近目标四个点的数据，sr[1]和sr[0]是目标左上角坐标,sr[2]是目标的宽，sr[3]是目标的高
+                    box = (sr[0],sr[1]-100,sr[2]+sr[0],sr[3]+sr[1])
                     print(box)
 
-                    #分别敌我，
+                    #分别敌我
 
-                    im = ImageGrab.grab(box)
-                    im.save('screenshot.png')
+                    img = ImageGrab.grab(box)
+                    img.save('screenshot.png')
 
-                    im = np.array(im)
-                    im = cv2.cvtColor(im, cv2.COLOR_RGB2BGR)
+                    img = cv2.imread('screenshot.png')
 
-                    lower_green = np.array([34, 255, 0])   #你自己设置的小队队友ROG颜色
-                    upper_green = np.array([34, 255, 0])
-                    mask_green = cv2.inRange(im, lower_green, upper_green)
+                    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
-                    lower_blue = np.array([54, 83, 179])     #你自己设置的队友ROG颜色
+                    # define range of blue color in HSV
+                    lower_blue = np.array([54, 83, 179])
                     upper_blue = np.array([54, 83, 179])
-                    mask_blue = cv2.inRange(im, lower_blue, upper_blue)
 
+                    # define range of green color in HSV
+                    lower_green = np.array([34, 255, 0])
+                    upper_green = np.array([34, 255, 0])
 
+                    # Threshold the HSV image to get only blue colors
+                    mask_blue = cv2.inRange(hsv, lower_blue, upper_blue)
+
+                    # Threshold the HSV image to get only green colors
+                    mask_green = cv2.inRange(hsv, lower_green, upper_green)
 
                     if data[pidc] and cv2.countNonZero(mask_green) == 0 and cv2.countNonZero(mask_blue) == 0:
                         px = -int(pidx(x))
