@@ -204,10 +204,10 @@ def loop(data):
                     sx, sy = sc
                     x = sx - cx
                     y = sy - cy
-                    box = (sr[0],sr[1]-100,sr[2]+sr[0],sr[3]+sr[1])
+                    box = (sr[0],sr[1]-100,sr[2]+sr[0],sr[3]+sr[1])   #检测敌友颜色框大小，sr是离准星最近目标四个点的数据，sr[1]和sr[0]是目标左上角坐标,sr[2]是目标的宽，sr[3]是目标的高
                     print(box)
 
-                    #分别敌我
+                    #分别敌我，
 
                     im = ImageGrab.grab(bbox=(box))
                     im.save('screenshot.png')
@@ -215,12 +215,12 @@ def loop(data):
                     im = np.array(im)
                     im = cv2.cvtColor(im, cv2.COLOR_RGB2BGR)
 
-                    lower_green = np.array([0, 255, 159])
-                    upper_green = np.array([0, 255, 159])
+                    lower_green = np.array([34 255, 0])   #你自己设置的小队队友ROG颜色
+                    upper_green = np.array([34 255, 0])
                     mask_green = cv2.inRange(im, lower_green, upper_green)
 
-                    lower_blue = np.array([223, 0, 255])
-                    upper_blue = np.array([223, 0, 255])
+                    lower_blue = np.array([54, 83, 179])     #你自己设置的队友ROG颜色
+                    upper_blue = np.array([54, 83, 179])
                     mask_blue = cv2.inRange(im, lower_blue, upper_blue)
 
 
