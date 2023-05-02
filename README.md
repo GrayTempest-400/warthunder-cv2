@@ -1,4 +1,4 @@
-# 说明
+# 说明(一定要打开源码看注释！！！）
 #没有训练集，还没训练集不能检测出坦克！！！
 #用peron测试的
 ![%6WRE61M5EG E@9H7`SNWO5](https://user-images.githubusercontent.com/101955396/235575092-137cb391-bc70-4897-9cac-92996a9178ff.png)
