@@ -1,6 +1,6 @@
 # 说明(一定要打开源码看注释！！！）
 #没有训练集，还没训练集不能检测出坦克！！！
-#用peron测试的
+#用person测试的
 ![%6WRE61M5EG E@9H7`SNWO5](https://user-images.githubusercontent.com/101955396/235575092-137cb391-bc70-4897-9cac-92996a9178ff.png)
 能拉枪指到人
 
@@ -49,7 +49,7 @@
 
 模型转换
 
-- .pt 模型可以转换为 .engine 模型以提高推理速度(需要 TensorRT 环境支持)
+- .pt 模型可以转换为 .engine 模型以提高推理速度(需要 TensorRT 环境支持)           转为.engine速度加3倍
 - `python export.py --weights 你训练出的.pt --device 0 --include engine`
 
 # 环境准备
