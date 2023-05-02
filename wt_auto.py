@@ -185,8 +185,8 @@ def loop(data):
 
             # 生产数据
             t1 = time.perf_counter_ns()
-
-            img = Capturer.backup(data[region])  # 如果句柄截图是黑色, 不能正常使用, 可以使用本行的截图方法
+            img = capturer.grab()
+            #img = Capturer.backup(data[region])  # 如果句柄截图是黑色, 不能正常使用, 可以使用本行的截图方法
             t2 = time.perf_counter_ns()
             aims, img = detector.detect(image=img, show=data[show])  # 目标检测, 得到截图坐标系内识别到的目标和标注好的图片(无需展示图片时img为none)
             t3 = time.perf_counter_ns()
