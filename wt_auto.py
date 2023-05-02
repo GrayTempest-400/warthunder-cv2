@@ -209,7 +209,7 @@ def loop(data):
 
                     #分别敌我，
 
-                    im = img
+                    im = ImageGrab.grab(box)
                     im.save('screenshot.png')
 
                     im = np.array(im)
