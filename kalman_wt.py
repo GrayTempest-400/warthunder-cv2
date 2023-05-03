@@ -241,10 +241,10 @@ def loop(data):
 
                     #cv2.imshow("Frame", cap)#如果要看预测框就把这个启用把#号删了
                     print(predicted)
-                    if data[pidc]:
+                    if data[pidc] and cv2.countNonZero(mask_green) == 0 and cv2.countNonZero(mask_blue) == 0:
 
                         move(predicted[0], predicted[1])
-                    else:
+                    elif cv2.countNonZero(mask_green) == 0 and cv2.countNonZero(mask_blue) == 0:
 
                         move(predicted[0], predicted[1])
 
