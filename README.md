@@ -12,12 +12,16 @@
 ![P0Y(RNR6GYZ2T$~$0`IA%MQ](https://user-images.githubusercontent.com/101955396/235575471-05ea3bd4-67bf-4828-9563-792ef1b67821.png)
 ![Z2UKYV93Z6FTALES6WHD)O6](https://user-images.githubusercontent.com/101955396/235575485-2aa5b5a7-eb90-4f8e-8207-a00f54b55cad.png)
 
+![_GS AN(EX5{2)6_$76I_}`1](https://user-images.githubusercontent.com/101955396/235845716-0f146d54-4dcc-449a-8f3e-95a031fc4fcd.png)
+`卡尔曼滤波`蓝圈是预测出的预测点           因为放不了视频就随便截了张图
 
 因为没有计算机视觉相关方向的专业知识, 所以做出来的东西, 有一定效果, 但是还有很多不足, 目前仍在调优
 
 源码说明:
 
 - wt_auto.py: 入口, 自瞄逻辑，敌我识别与程序控制都在这里
+- kalman_wt.py:在wt_auto.py的基础上加了卡尔曼滤波，用于攻击移动的敌人(屏幕坐标系检测，类似[1,0][2,0][3,0]卡尔曼预测出[4,0]`但战雷谁会匀速
+走直线（`
 - toolkit.py: 自行封装的工具, 封装了截图推理等工具
 - yolos5s.pt: 预训练模型权重文件,无训练，还不能检测坦克
 - logitech.driver.dll: 大佬封装的调用罗技驱动的库文件
