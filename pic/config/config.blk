@@ -1,0 +1,135 @@
+graphicsQuality:t="ultralow"
+clientBitType:t="auto"
+doShowDriversOutdated:b=yes
+renderer3:t="auto"
+rdseed:i=41
+language:t="Chinese"
+use_eac:b=yes
+forcedLauncher:i=0
+use_release_candidate:b=yes
+releaseChannel:t="ReleaseCandidate"
+use_gamepad_interface:b=no
+
+video{
+  fonts:t="big"
+  perfMetrics:i=1
+  vsync:b=no
+  adaptive_vsync:b=no
+  postfx_antialiasing:t="none"
+  latencyFlash:b=yes
+  compatibilityMode:b=yes
+  dlssSharpness:i=0
+  dlssQuality:i=-1
+  temporalResolutionScale:r=1
+  mode:t="windowed"
+  windowed:b=yes
+  latency:i=1
+  alpha_to_coverage:b=no
+  vrStreamerMode:b=no
+  resolution:t="1024 x 768"
+  vreye:t="left"
+  instancing:t="auto"
+  driver:t="auto"
+}
+
+graphics{
+  rendinstDistMul:r=0.5
+  enableSuspensionAnimation:b=no
+  landquality:i=0
+  texquality:t="low"
+  skyQuality:i=2
+  advancedShore:b=no
+  backgroundScale:r=1
+  clipmapScale:r=0.5
+  cloudsQuality:i=2
+  mirrorQuality:i=0
+  anisotropy:i=1
+  fxTarget:t="low"
+  ssaa:r=1
+  physicsQuality:i=0
+  tireTracksQuality:i=0
+  contactShadowsQuality:i=0
+  panoramaResolution:i=1024
+  lenseFlares:b=no
+  shadowQuality:t="ultralow"
+  fxDensityMul:r=0.2
+  displacementQuality:i=0
+  dirtSubDiv:i=1
+  giQuality:t="low"
+  lastClipSize:i=4096
+  grassRadiusMul:r=0.01
+  riGpuObjects:b=no
+  waterQuality:t="low"
+  compatibilityShadowQuality:t="low"
+}
+
+render{
+  grass:b=no
+  softFx:b=no
+  ssrQuality:i=0
+  staticShadowsOnEffects:b=no
+  shadows:b=yes
+  haze:b=no
+  selfReflection:b=no
+  rendinstGlobalShadows:b=yes
+  ssaoQuality:i=0
+}
+
+directx{
+  enableHdr:b=no
+  maxaa:i=0
+}
+
+gameplay{
+  enableVR:b=no
+}
+
+debug{
+  screenshotAsJpeg:b=no
+  enableNvHighlights:t="on"
+  512mboughttobeenoughforanybody:b=no
+  netLogerr:b=yes
+}
+
+oculus{
+  edgeScale:r=0.95
+  magnetometerEnabled:b=no
+  maxSeparation:r=0.0005
+  predictionEnabled:b=no
+  k2:r=0.666
+  k1:r=0.5
+  zeroParallaxDist:r=3
+  fovMul:r=1.2
+}
+
+launcher{
+  startup_with_windows:b=no
+  hide_to_tray_option:b=no
+  bg_update:b=no
+  bg_tray:b=yes
+}
+
+download{
+  peer_exchange:b=yes
+  DHT:b=yes
+  dnl_speed_rate:i=1000
+  upl_speed_rate:i=1000
+  seeding_on:b=yes
+  upl_limit:b=no
+  dnl_limit:b=no
+  UTP2:b=yes
+}
+
+yunetwork{
+  webStatusLocalhostOnly:b=yes
+  curCircuit:t="production"
+  enableWebStatus:b=no
+  webStatusPort:i=55444
+  isExpertMode:b=yes
+}
+
+sound{
+  speakerMode:t="speakers7.1"
+  fmod_sound_enable:b=no
+  enable_mod:b=yes
+}
