@@ -5,12 +5,6 @@ import time
 import find
 import math
 
-def findme(img):
-    md = find('0.jpg')
-    bbox = (md[0]+30, md[0]+30, md[0]+30, md[0]+30)
-    img = ImageGrab.grab(bbox)
-
-
 
 
 
