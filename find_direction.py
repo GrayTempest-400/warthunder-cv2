@@ -1,11 +1,41 @@
 import cv2 as cv
-import numpy as np
-from PIL import ImageGrab
 import time
-import find
+import cv2
+import mss
+import numpy as np
 import math
+from find import identify_gap
 
 
+def findme(p):#缺口检测
+    sec = mss.mss()
+    screen = {
+        'left': 0,
+        'top': 0,
+        'width': 1027,
+        'height': 794
+    }
+    img = sec.grab(screen)
+    img = np.array(img)
+    a = identify_gap(img, p)
+    if a == -0:
+        findx = False
+    else:
+
+        x1 = a[0][0]
+        y1 = a[0][1]
+        x2 = a[1][0]
+        y2 = a[1][1]
+
+        return x1, y1, x2, y2
+    
+def show_binary(path):#图片二值化
+    img = cv2.imread(path)
+    gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    _, binary_img = cv2.threshold(gray_img, 127, 255, cv2.THRESH_BINARY)
+    cv2.imshow('binary_img', binary_img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
 
 def ImageRotate(img, angle):   # img:输入图片；newIm：输出图片；angle：旋转角度(°)
