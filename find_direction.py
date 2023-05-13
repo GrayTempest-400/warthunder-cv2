@@ -1,108 +1,166 @@
-import cv2
-import math
+import cv2 as cv
 import numpy as np
-#查找箭头的轮廓并计算其方向
-#将图像转换为灰度图像。
-#对灰度图像进行二值化处理。
-#找到二值化图像中的轮廓。
-#对每个轮廓进行逼近，以减少轮廓中的点数。
-#如果逼近后的轮廓有7个点，则将其作为箭头的轮廓。
-#找到箭头轮廓的边界框。
-#将边界框中的区域提取出来，并将其转换为灰度图像。
-#对提取出来的灰度图像进行二值化处理。
-#找到二值化图像中的轮廓。
-#对每个轮廓进行逼近，以减少轮廓中的点数。
-#如果逼近后的轮廓有4个点，则将其作为箭头尖端的轮廓。
-#找到箭头尖端轮廓的边界框。
-#如果箭头尖端在图像中心附近，则计算箭头方向与水平方向之间的角度。
-def get_arrow_direction(image):
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    _, thresh = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
-    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    for cnt in contours:
-        approx = cv2.approxPolyDP(cnt, 0.01*cv2.arcLength(cnt,True),True)
-        if len(approx) == 7:
-            x,y,w,h = cv2.boundingRect(cnt)
-            roi = image[y:y+h,x:x+w]
-            gray_roi = cv2.cvtColor(roi,cv2.COLOR_BGR2GRAY)
-            _,thresh_roi = cv2.threshold(gray_roi,127,255,cv2.THRESH_BINARY)
-            contours_roi,_ = cv2.findContours(thresh_roi,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
-            for cnt_roi in contours_roi:
-                approx_roi = cv2.approxPolyDP(cnt_roi,0.01*cv2.arcLength(cnt_roi,True),True)
-                if len(approx_roi) == 4:
-                    x1,y1,w1,h1 = cv2.boundingRect(cnt_roi)
-                    if x1 > w/3 and x1 < w*2/3 and y1 > h/3 and y1 < h*2/3:
-                        angle = get_angle(x+w/2,y+h/2,x+x1+w1/2,y+y1+h1/2)
-                        return angle
-
-#计算两点之间的角度
-def get_angle(x1, y1, x2, y2):
-    dx = x2 - x1
-    dy = y2 - y1
-    rads = math.atan2(-dy,dx)
-    rads %= 2*math.pi
-    degs = math.degrees(rads)
-    return degs
+import time
 
 
-#计算箭头是否指向点
-def detect_arrow_direction(point1, point2, arrow_point):
-    # 计算两点之间的角度
-    angle = np.arctan2(point2[1] - point1[1], point2[0] - point1[0]) * 180 / np.pi
 
-    # 计算箭头点和第二个点之间的角度
-    arrow_angle = np.arctan2(arrow_point[1] - point2[1], arrow_point[0] - point2[0]) * 180 / np.pi
-
-    # 计算两个角度之间的差异
-    angle_diff = abs(angle - arrow_angle)
-
-    # 如果差异小于10度，则箭头指向第二个点
-    if angle_diff < 10:
-        return True
-    else:
-        return False
-
-# 示例用法
-point1 = (10, 10)
-point2 = (50, 50)
-arrow_point = (30, 30)
-
-if detect_arrow_direction(point1, point2, arrow_point):
-    print("箭头指向第二个点")
-else:
-    print("箭头未指向第二个点")
+def ImageRotate(img, angle):   # img:输入图片；newIm：输出图片；angle：旋转角度(°)
+    height, width = img.shape[:2]  # 输入(H,W,C)，取 H，W 的值
+    center = (width // 2, height // 2)  # 绕图片中心进行旋转
+    M = cv.getRotationMatrix2D(center, angle, 1.0)
+    image_rotation = cv.warpAffine(img, M, (width, height))
+    return image_rotation
 
 
-#get_arrow_direction，它使用Canny边缘检测和霍夫变换来检测箭头并确定其方向。在这个示例中，我们将图像文件arrow.png传递给get_arrow_direction函数，并打印出箭头的方向。
-def get_direction(img):
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    edges = cv2.Canny(gray, 50, 150, apertureSize=3)
-    lines = cv2.HoughLines(edges, 1, np.pi / 180, 200)
+# 取圆形ROI区域函数：具体实现功能为输入原图，取原图最大可能的原型区域输出
+def circle_tr(src):
+    dst = np.zeros(src.shape, np.uint8)  # 感兴趣区域ROI
+    mask = np.zeros(src.shape, dtype='uint8')  # 感兴趣区域ROI
+    (h, w) = mask.shape[:2]
+    (cX, cY) = (w // 2, h // 2)  # 是向下取整
+    radius = int(min(h, w) / 2)
+    cv.circle(mask, (cX, cY), radius, (255, 255, 255), -1)
+    # 以下是copyTo的算法原理：
+    # 先遍历每行每列（如果不是灰度图还需遍历通道，可以事先把mask图转为灰度图）
+    for row in range(mask.shape[0]):
+        for col in range(mask.shape[1]):
+            # 如果掩图的像素不等于0，则dst(x,y) = scr(x,y)
+            if mask[row, col] != 0:
+                # dst_image和scr_Image一定要高宽通道数都相同，否则会报错
+                dst[row, col] = src[row, col]
+                # 如果掩图的像素等于0，则dst(x,y) = 0
+            elif mask[row, col] == 0:
+                dst[row, col] = 0
+    return dst
 
-    if lines is None:
-        return None
 
-    for line in lines:
-        rho, theta = line[0]
-        if np.pi / 4 <= theta <= 3 * np.pi / 4:
-            return "up" if rho < 0 else "down"
-        else:
-            return "left" if rho < 0 else "right"
-#is_arrow_pointing_to_coordinate函数使用get_arrow_direction函数来获取箭头的方向，并使用数学计算来确定箭头是否指向一个坐标。
-# 在这个示例中，我们将图像文件arrow.png传递给is_arrow_pointing_to_coordinate函数，并传递坐标(100,100)，以确定箭头是否指向该坐标
-def is_arrow_pointing_to_coordinate(img, x, y):
-    arrow_direction = get_arrow_direction(img)
+# 金字塔下采样
+def ImagePyrDown(image,NumLevels):
+    for i in range(NumLevels):
+        image = cv.pyrDown(image)       #pyrDown下采样
+    return image
 
-    if arrow_direction == "up":
-        return y < img.shape[0] / 2
-    elif arrow_direction == "down":
-        return y > img.shape[0] / 2
-    elif arrow_direction == "left":
-        return x < img.shape[1] / 2
-    elif arrow_direction == "right":
-        return x > img.shape[1] / 2
 
-img = cv2.imread("arrow.png")
-is_pointing_to_coordinate = is_arrow_pointing_to_coordinate(img, 100, 100)
-print(is_pointing_to_coordinate)
+def RatationMatch(modelpicture, searchpicture):
+# 旋转匹配函数（输入参数分别为模板图像、待匹配图像）
+    searchtmp = []
+    modeltmp = []
+
+    searchtmp = ImagePyrDown(searchpicture, 3)
+    modeltmp = ImagePyrDown(modelpicture, 3)
+
+    newIm = circle_tr(modeltmp)
+    # 使用matchTemplate对原始灰度图像和图像模板进行匹配
+    res = cv.matchTemplate(searchtmp, newIm, cv.TM_SQDIFF_NORMED)
+    min_val, max_val, min_indx, max_indx = cv.minMaxLoc(res)
+    location = min_indx
+    temp = min_val
+    angle = 0  # 当前旋转角度记录为0
+
+    tic = time.time()
+    # 以步长为5进行第一次粗循环匹配
+    for i in range(-180, 181, 5):
+        newIm = ImageRotate(modeltmp, i)
+        newIm = circle_tr(newIm)
+        res = cv.matchTemplate(searchtmp, newIm, cv.TM_SQDIFF_NORMED)
+        min_val, max_val, min_indx, max_indx = cv.minMaxLoc(res)
+        if min_val < temp:
+            location = min_indx
+            temp = min_val
+            angle = i
+    toc = time.time()
+    print('第一次粗循环匹配所花时间为：' + str(1000 * (toc - tic)) + 'ms')
+
+    tic = time.time()
+    # 在当前最优匹配角度周围10的区间以1为步长循环进行循环匹配计算
+    for j in range(angle - 5, angle + 6):
+        newIm = ImageRotate(modeltmp, j)
+        newIm = circle_tr(newIm)
+        res = cv.matchTemplate(searchtmp, newIm, cv.TM_SQDIFF_NORMED)
+        min_val, max_val, min_indx, max_indx = cv.minMaxLoc(res)
+        if min_val < temp:
+            location = min_indx
+            temp = min_val
+            angle = j
+    toc = time.time()
+    print('在当前最优匹配角度周围10的区间以1为步长循环进行循环匹配所花时间为：' + str(1000 * (toc - tic)) + 'ms')
+
+    tic = time.time()
+    # 在当前最优匹配角度周围2的区间以0.1为步长进行循环匹配计算
+    k_angle = angle - 0.9
+    for k in range(0, 19):
+        k_angle = k_angle + 0.1
+        newIm = ImageRotate(modeltmp, k_angle)
+        newIm = circle_tr(newIm)
+        res = cv.matchTemplate(searchtmp, newIm, cv.TM_SQDIFF_NORMED)
+        min_val, max_val, min_indx, max_indx = cv.minMaxLoc(res)
+        if min_val < temp:
+            location = min_indx
+            temp = min_val
+            angle = k_angle
+    toc = time.time()
+    print('在当前最优匹配角度周围2的区间以0.1为步长进行循环匹配所花时间为：' + str(1000 * (toc - tic)) + 'ms')
+
+    # 用下采样前的图片来进行精匹配计算
+    k_angle = angle - 0.1
+    newIm = ImageRotate(modelpicture, k_angle)
+    newIm = circle_tr(newIm)
+    res = cv.matchTemplate(searchpicture, newIm, cv.TM_CCOEFF_NORMED)
+    min_val, max_val, min_indx, max_indx = cv.minMaxLoc(res)
+    location = max_indx
+    temp = max_val
+    angle = k_angle
+    for k in range(1, 3):
+        k_angle = k_angle + 0.1
+        newIm = ImageRotate(modelpicture, k_angle)
+        newIm = circle_tr(newIm)
+        res = cv.matchTemplate(searchpicture, newIm, cv.TM_CCOEFF_NORMED)
+        min_val, max_val, min_indx, max_indx = cv.minMaxLoc(res)
+        if max_val > temp:
+            location = max_indx
+            temp = max_val
+            angle = k_angle
+
+    location_x = location[0] + 50
+    location_y = location[1] + 50
+
+    # 前面得到的旋转角度是匹配时模板图像旋转的角度，后面需要的角度值是待检测图像应该旋转的角度值，故需要做相反数变换
+    angle = -angle
+
+    match_point = {'angle': angle, 'point': (location_x, location_y)}
+    return match_point
+
+
+# 画图
+def draw_result(src, temp, match_point):
+    cv.rectangle(src, match_point,
+                  (match_point[0] + temp.shape[1], match_point[1] + temp.shape[0]),
+                  (0, 255, 0), 2)
+    cv.imshow('result', src)
+    cv.waitKey()
+
+
+
+def get_realsense(src, temp):
+    ModelImage = temp
+    SearchImage = src#srcx
+    ModelImage_edge = cv.GaussianBlur(ModelImage, (5, 5), 0)
+    ModelImage_edge = cv.Canny(ModelImage_edge, 10, 200, apertureSize=3)
+    SearchImage_edge = cv.GaussianBlur(SearchImage, (5, 5), 0)
+
+    (h1, w1) = SearchImage_edge.shape[:2]
+    SearchImage_edge = cv.Canny(SearchImage_edge, 10, 180, apertureSize=3)
+    serch_ROIPart = SearchImage_edge[50:h1 - 50, 50:w1 - 50]  # 裁剪图像
+
+    tic = time.time()
+    match_points = RatationMatch(ModelImage_edge, serch_ROIPart)
+    toc = time.time()
+    print('匹配所花时间为：' + str(1000 * (toc - tic)) + 'ms')
+    print('匹配的最优区域的起点坐标为：' + str(match_points['point']))
+    print('相对旋转角度为：' + str(match_points['angle']))
+    TmpImage_edge = ImageRotate(SearchImage_edge, match_points['angle'])
+    cv.imshow("TmpImage_edge", TmpImage_edge)
+    cv.waitKey()
+    draw_result(SearchImage, ModelImage_edge, match_points['point'])
+    return match_points
 
