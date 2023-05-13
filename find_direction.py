@@ -1,6 +1,16 @@
 import cv2 as cv
 import numpy as np
+from PIL import ImageGrab
 import time
+import find
+import math
+
+def findme(img):
+    md = find('0.jpg')
+    bbox = (md[0]+30, md[0]+30, md[0]+30, md[0]+30)
+    img = ImageGrab.grab(bbox)
+
+
 
 
 
@@ -164,3 +174,28 @@ def get_realsense(src, temp):
     draw_result(SearchImage, ModelImage_edge, match_points['point'])
     return match_points
 
+def findtheater(x1, y1, x2, y2):
+    """ 已知两点坐标计算角度 -
+    :param x1: 原点横坐标值
+    :param y1: 原点纵坐标值
+    :param x2: 目标点横坐标值
+    :param y2: 目标纵坐标值
+    """
+    angle = 0.0
+    dx = x2 - x1
+    dy = y2 - y1
+    if x2 == x1:
+        angle = math.pi / 2.0
+        if y2 == y1:
+            angle = 0.0
+        elif y2 < y1:
+            angle = 3.0 * math.pi / 2.0
+    elif x2 > x1 and y2 > y1:
+        angle = math.atan(dx / dy)
+    elif x2 > x1 and y2 < y1:
+        angle = math.pi / 2 + math.atan(-dy / dx)
+    elif x2 < x1 and y2 < y1:
+        angle = math.pi + math.atan(dx / dy)
+    elif x2 < x1 and y2 > y1:
+        angle = 3.0 * math.pi / 2.0 + math.atan(dy / -dx)
+    return angle * 180 / math.pi
