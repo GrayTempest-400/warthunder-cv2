@@ -1,0 +1,7 @@
+# file: yolov8_custom.yaml
+path: ./data_split  # 数据的路径
+train: train.txt  # 训练数据的路径
+val: val.txt # 验证数据的路径
+
+# 类别名字
+names: ['arrow']  # 按照你的数据集的实际情况填写类别名字
