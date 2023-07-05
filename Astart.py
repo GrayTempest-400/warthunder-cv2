@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-
+#参考：
+#https://www.gamedev.net/articles/programming/artificial-intelligence/a-pathfinding-for-beginners-r2003/
+#https://blog.csdn.net/qq_33747722/article/details/78436919
 import os, sys, random, math
 
 #地图设置
