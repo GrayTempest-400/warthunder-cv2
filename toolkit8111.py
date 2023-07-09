@@ -156,7 +156,7 @@ import pygetwindow as gw
 window = gw.getWindowsWithTitle('War Thunder')[0]
 
 # 将窗口调整为1280x720
-window.resizeTo(1280, 720)
+window.resizeTo(1280, 720)   #有的笔记本用户需将缩放调为100%，有的125%也能跑，这是玄学
 
 # 将窗口移动到左上角
 window.moveTo(0, 0)
