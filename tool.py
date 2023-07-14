@@ -152,7 +152,7 @@ def detect(img):
     for cls, conf, boxes_xywh in aims:
 
         name = class_mapping[int(cls)]
-        final_aims.append((int(cls),name,conf,boxes_xywh))
+        if name == 'person': #当名字为person才记录在表格
+           final_aims.append((int(cls),name,conf,boxes_xywh))
 
     return final_aims
-
