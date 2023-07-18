@@ -1,7 +1,10 @@
 import cv2
 import numpy as np
 from collections import Counter
-
+import win32con
+import win32gui
+import mss
+import pyautogui
 
 def detect_buttons(screenshot_path, template_path, threshold=0.8):
     # 读取游戏界面的屏幕截图和按钮的模板图像
@@ -30,8 +33,12 @@ def detect_buttons(screenshot_path, template_path, threshold=0.8):
         center_x = (x1 + x2) // 2
         center_y = (y1 + y2) // 2
         button_centers.append((center_x, center_y))
+    if len(button_centers) > 4:
+        return False
 
     return button_centers
+
+
 
 
 def find_template_in_image(image_path, template_path):
@@ -73,9 +80,67 @@ def most_common_array(arr_list):
     most_common_array, count = array_counter.most_common(1)[0]
     return most_common_array
 
+def active():  # 窗口置顶
+    hwnd = win32gui.FindWindow(None,'War Thunder')
+    win32gui.ShowWindow(hwnd, win32con.SW_SHOWNORMAL)
+    win32gui.SetWindowPos(hwnd, win32con.HWND_TOP, 0, 0, 0, 0, win32con.SWP_NOSIZE | win32con.SWP_SHOWWINDOW)
+    win32gui.SetForegroundWindow(hwnd)
+
+def find(p):
+    sec = mss.mss()
+    screen = {
+        'left': 0,
+        'top': 0,
+        'width': 1285,
+        'height': 794
+    }
+    img = sec.grab(screen)
+    # Save the grabbed image to a file
+    img_path = 'screenshot.png'
+    cv2.imwrite(img_path, np.array(img))
+
+    a = find_template_in_image(img_path, p)
+
+    return a
+def find1 (p,threshold):
+    sec = mss.mss()
+    screen = {
+        'left': 0,
+        'top': 0,
+        'width': 1285,
+        'height': 794
+    }
+    img = sec.grab(screen)
+    # Save the grabbed image to a file
+    img_path = 'screenshot.png'
+    cv2.imwrite(img_path, np.array(img))
+
+    a = detect_buttons(img_path, p,threshold)
+
+    return a
+
+def check(p):
+    b = (find(p))
+    a = most_common_array(b)
+    if a is not None:
+        print(a[0], a[1])
+        pyautogui.moveTo(a[0], a[1])
+        pyautogui.click()
+        return True
+    elif a is None:
+        return False
+    else:
+        return False
+
+
 # 示例使用
-main_image_path = 'pic/t6.png'
-template_image_path = 'pic/X.png'
+
+
+
+
+# 示例使用
+main_image_path = 'pic/t114.png'
+template_image_path = 'pic/join.png'
 print(detect_buttons(main_image_path,template_image_path,threshold=0.8))
 # 给定的列表
 arr_list = (find_template_in_image(main_image_path, template_image_path))
