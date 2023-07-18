@@ -1,6 +1,8 @@
 from detect import *
 import time
 import cv2
+import ctypes
+import keyboard
 from win32gui import FindWindow, SetWindowPos
 from win32con import HWND_TOPMOST, SWP_NOMOVE, SWP_NOSIZE
 
@@ -12,11 +14,30 @@ size = 'size'
 init = {
     show: True,  # 显示, Down
     size: 200,  # 截图的尺寸, 屏幕中心截图周围大小
+    
 }
+
 
 c = cx_cy()
 
 text = 'Realtime Screen Capture Detect'
+try:
+    import os
+
+    root = os.path.abspath(os.path.dirname(__file__))
+    driver = ctypes.CDLL(f'{root}/logitech.driver.dll')
+    ok = driver.device_open() == 1
+    if not ok:
+        print('初始化失败, 未安装罗技驱动')
+except FileNotFoundError:
+    print('初始化失败, 缺少文件')
+def move(x: int, y: int):
+    if (x == 0) and (y == 0):
+         return
+    # x和y转换为ctypes支持的整数类型
+    c_int_x = ctypes.c_int(x)
+    c_int_y = ctypes.c_int(y)
+    driver.moveR(c_int_x, c_int_y, True)
 
 def loop():
     while True:
@@ -29,7 +50,13 @@ def loop():
         t3 = time.perf_counter_ns()
         aim = get_coordinate(init[size], x, y)    #转换屏幕坐标
         print(aim)
-
+        if aim:
+           x = aim[0]
+           y = aim[1]
+           move(x,y)
+        if keyboard.is_pressed('h'):
+            print("按下了'h'键，退出函数执行")
+            break
         # 瞄点划线
         if aim:
             cv2.line(image, aim, (c[0], c[1]), (255, 255, 0), 2)
