@@ -31,6 +31,7 @@
 
 - wt_auto.py: 入口, 自瞄逻辑，敌我识别与程序控制都在这里
 - wt_auto_Arcade : 街机版
+- yolov8FPSGame : yolov8版，基于 wt_auto.py
 - Monocular_ranging : 测距，具体自定义见代码注释
 - toolkit.py , tool , detect: 自行封装的工具, 封装了截图推理等工具
 - yolos5s.pt: 预训练模型权重文件,无训练，还不能检测坦克
@@ -42,4 +43,5 @@
 - wt.bak.fov,wt.bak.pid,wt.bak.queue : 基于wt_auto的改进型
 - tool_matches ，find_direction: 模板匹配工具   自定义用于检测按钮
 - 其他 ： 依赖文件或无用文件
-- 
+
+
