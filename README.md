@@ -29,6 +29,8 @@
 街机检测版，绿色的是瞄准点                   根据边缘检测，代码25 - 27 行HSV范围自己调，我也不会找HSV范围，检测不准确
 ![wayfing](https://github.com/GrayTempest-400/warthunder-cv2/assets/101955396/762235bb-c636-4a9d-955c-7a2a928c2f7d)
 自动寻路 基于8111端口
+测试视频请见
+https://www.bilibili.com/video/BV1M841127RG/
 源码说明:
 
 - wt_auto.py: 入口, 自瞄逻辑，敌我识别与程序控制都在这里
