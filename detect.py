@@ -10,10 +10,148 @@ from win32con import SRCCOPY, SM_CXSCREEN, SM_CYSCREEN, DESKTOPHORZRES, DESKTOPV
 from win32gui import GetDesktopWindow, GetWindowDC, DeleteObject, GetDC, ReleaseDC, FindWindow
 from win32ui import CreateDCFromHandle, CreateBitmap
 from win32print import GetDeviceCaps
+import mss
+import pytesseract
+from PIL import ImageGrab
+import pyautogui
+import easyocr
+import time
+import pandas as pd
 
 
 
 
+
+def extract_text_from_image(image_path):
+    reader = easyocr.Reader(['ch_sim', 'en'], gpu=False, model_storage_directory="model", download_enabled=True)
+    start_time = time.time()
+    info = reader.readtext(image=image_path)
+    print('cpu need time', time.time() - start_time, 's')
+
+    df = pd.DataFrame(columns=['x1', 'y1', 'x2', 'y2', 'text', 'proba'])
+
+    for i, item in enumerate(info):
+        # 保留左上和右下坐标
+        ((x1, y1), _, (x2, y2), _), text, prob = item
+        df.loc[i] = [x1, y1, x2, y2, text, prob]
+    # 缓存结果，不重复识别
+    df.to_csv('road-poetry.csv')
+    data = pd.read_csv('road-poetry.csv')
+
+    # 访问x1, y1, x2, y2字段
+    x1_values = data['x1']
+    y1_values = data['y1']
+    x2_values = data['x2']
+    y2_values = data['y2']
+
+    # 计算中心点并添加到DataFrame中
+    data['cx'] = x2_values - x1_values
+    data['cy'] = y2_values - y1_values
+
+    # 输出数据示例
+    for i in range(len(data)):
+        cx = data['cx'][i]
+        cy = data['cy'][i]
+        print(f"x1: {x1_values[i]}, y1: {y1_values[i]}, x2: {x2_values[i]}, y2: {y2_values[i]}, cx: {cx}, cy: {cy}")
+
+    # 将中心点坐标返回为一个列表
+    center_points = [(cx, cy) for cx, cy in zip(data['cx'], data['cy'])]
+
+    return center_points
+
+
+
+
+# 读取CSV数据文件
+# Call the function and pass the image file path as an argument
+#image_file_path = '111.jpg'
+#extracted_data = extract_text_from_image(image_file_path)
+#print(extracted_data)
+def cx_cy():
+
+    root = tk.Tk()
+    screen_width = root.winfo_screenwidth()
+    screen_height = root.winfo_screenheight()
+    root.destroy()
+
+    center_x = screen_width // 2
+    center_y = screen_height // 2
+
+    cx, cy = center_x, center_y
+
+    return cx, cy
+def get_coordinate(size ,x,y):
+    a = cx_cy()
+    # 假设原始图像在屏幕中的位置和大小，以及检测得到的图像中心点坐标
+    screen_center_x  , screen_center_y = a[0], a[1]
+    image_width = size   # 图像的宽度
+    image_height = size  # 图像的高度
+    image_center_x = x  # 检测得到的图像中心点在图像坐标系中的x坐标
+    image_center_y = y  # 检测得到的图像中心点在图像坐标系中的y坐标
+    screen_x = screen_center_x - image_width + image_center_x
+    screen_y = screen_center_y - image_height + image_center_y
+
+    print("屏幕坐标 x:", screen_x)
+    print("屏幕坐标 y:", screen_y)
+    return screen_x, screen_y
+
+
+
+def find_purple_points(image_path, target_point=(960, 540)):
+    # 读取图像
+    image = cv2.imread(image_path)
+
+    # 将图像从BGR颜色空间转换为HSV颜色空间
+    hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+
+    # 定义紫色的HSV范围
+    lower_purple = np.array([130, 55, 55])
+    upper_purple = np.array([160, 255, 255])
+
+    # 提取紫色区域
+    mask = cv2.inRange(hsv_image, lower_purple, upper_purple)
+
+    # 查找紫色区域中的点的轮廓
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # 计算紫色点的中心坐标
+    purple_points = []
+    for contour in contours:
+        M = cv2.moments(contour)
+        if M["m00"] != 0:
+            cX = int(M["m10"] / M["m00"])
+            cY = int(M["m01"] / M["m00"])
+            purple_points.append((cX, cY))
+
+    # 如果找不到紫色点，返回None
+    if not purple_points:
+        return None, None, None
+
+    # 找到距离给定点最近的紫色点的中心坐标
+    nearest_point = min(purple_points, key=lambda p: np.linalg.norm(np.array(p) - np.array(target_point)))
+
+    x, y = nearest_point[0], nearest_point[1] + 15
+    # 在图像上绘制红色圆点标记
+    cv2.circle(image, (x, y), 5, (0, 0, 255), -1)
+
+    return image, x, y
+# 替换为您的图像文件路径
+image_path = 'tt2.png'
+result_image,x,y = find_purple_points(image_path, target_point=(960, 540))
+if result_image is not None:
+    print(x, y)
+
+
+
+def capture_screenshot(top, left, right, height, output_file):
+    width = right - left
+    with mss.mss() as sct:
+        monitor = {"top": top, "left": left, "width": width, "height": height}
+        sct_img = sct.shot(output=output_file, output_format="png", mon=monitor)
+    return sct_img
+
+import cv2
+import numpy as np
 
 def find_specific_purple_edges(image_path, show):
     # 读取图像
@@ -23,7 +161,7 @@ def find_specific_purple_edges(image_path, show):
     hsv_img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
     # 定义紫色的HSV范围
-    lower_purple = np.array([135, 55, 55])
+    lower_purple = np.array([130, 55, 55])
     upper_purple = np.array([160, 255, 255])
     # 创建紫色掩膜
     purple_mask = cv2.inRange(hsv_img, lower_purple, upper_purple)
@@ -55,15 +193,18 @@ def find_specific_purple_edges(image_path, show):
             if y > bottommost[1]:
                 bottommost = (x, y)
 
+    # 检查是否找到紫色边缘
+    if not contours:
+        return None, img
+
     # 计算中心点
     center_x = (leftmost[0] + rightmost[0]) // 2
     center_y = (topmost[1] + bottommost[1]) // 2
     # Calculate the new center_y at 40% of its original position
     height = bottommost[1] - topmost[1]
-    new_height = height * 15// 100
+    new_height = height * 15 // 100
     new_center_y = center_y + new_height
     center = (center_x, new_center_y)
-
 
     if show:
         # 在图像上绘制中心点和轮廓点
@@ -73,9 +214,53 @@ def find_specific_purple_edges(image_path, show):
                 x, y = point[0]
                 cv2.circle(img, (x, y), 2, (255, 0, 255), -1)  # 绘制紫色点，半径为2
 
+    return center, img
+
+# Example usage:
+# center, output_img = find_specific_purple_edges("path/to/your/image.jpg", show=True)
+# if center is None:
+#     print("No purple edges found.")
+# else:
+#     cv2.imshow("Output Image", output_img)
+#     cv2.waitKey(0)
+#     cv2.destroyAllWindows()
 
 
-    return center , img
+
+
+
+
+def find_center_closest_to_screen_center(points, screen_size):
+    screen_center_x, screen_center_y = screen_size[0] // 2, screen_size[1] // 2
+    min_distance = float('inf')
+    closest_point = None
+
+    for point in points:
+        distance = (point[0] - screen_center_x) ** 2 + (point[1] - screen_center_y) ** 2
+        if distance < min_distance:
+            min_distance = distance
+            closest_point = point
+
+    return closest_point
+
+def extract_purple_text_coordinates():
+    # 截取整个屏幕图像
+    screenshot = ImageGrab.grab()
+
+    # 保存截图以便于后续调试（可选）
+    screenshot.save("screenshot.png")
+
+    # 使用Pytesseract进行OCR识别
+    ocr_result = pytesseract.image_to_string(screenshot, lang='eng')
+
+    # 在识别结果中查找紫色文字
+    purple_text_coordinates = []
+    for line_number, line_text in enumerate(ocr_result.split('\n')):
+        if '紫色文字关键词' in line_text:  # 用实际的紫色文字关键词替换 '紫色文字关键词'
+            x, y = pyautogui.locateCenterOnScreen("screenshot.png")
+            purple_text_coordinates.append((x, y))
+
+    return purple_text_coordinates
 
 def check_green_color(image, x, y):
     # 获取周围5个像素范围内的区域
@@ -174,26 +359,23 @@ def capture_screen_around_center(s):
 
     screenshot = ImageGrab.grab(bbox=(left, top, right, bottom))
     img = screenshot
-    img.save('detect.jpg')
+    img.save('detect.png')
     return img
 
 
+def capture_screen_around_centers(s):
+    screen_info = get_screen_info()
+    center_x, center_y = screen_info['center_x'], screen_info['center_y']
+    left = center_x - s
+    top = center_y - s
+    right = center_x + s
+    bottom = center_y + s
 
+    screenshot = ImageGrab.grab(bbox=(left, top, right, bottom))
+    img = screenshot
+    img.save('detect_full.png')
+    return img
 
-def get_coordinate(size ,x,y):
-    a = cx_cy()
-    # 假设原始图像在屏幕中的位置和大小，以及检测得到的图像中心点坐标
-    screen_center_x  , screen_center_y = a[0], a[1]
-    image_width = size   # 图像的宽度
-    image_height = size  # 图像的高度
-    image_center_x = x  # 检测得到的图像中心点在图像坐标系中的x坐标
-    image_center_y = y  # 检测得到的图像中心点在图像坐标系中的y坐标
-    screen_x = screen_center_x - image_width + image_center_x
-    screen_y = screen_center_y - image_height + image_center_y
-
-    print("屏幕坐标 x:", screen_x)
-    print("屏幕坐标 y:", screen_y)
-    return screen_x, screen_y
 
 class Capturer:
 
@@ -396,4 +578,30 @@ class Predictor:
         predicted = self.kf.predict()
         px, py = int(predicted[0]), int(predicted[1])
         return px, py
+
+import cv2
+import numpy as np
+
+
+
+def find_names_gray(tp):
+    # 定义HSV颜色范围
+    lower_purple = np.array([130, 55, 55])
+    upper_purple = np.array([160, 255, 255])
+
+    # 读取图像
+    image = cv2.imread(tp)  # 替换
+    # 将图像从BGR颜色空间转换为HSV颜色空间
+    hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    # 创建一个掩码，显示在指定HSV范围内的颜色
+    mask = cv2.inRange(hsv_image, lower_purple, upper_purple)
+    # 通过在原始图像上应用掩码，只显示在指定HSV范围内的颜色
+    cv2.bitwise_and(image, image, mask=mask)
+    # 将掩膜应用于原始图像
+    purple_masked_image = cv2.bitwise_and(image, image, mask=mask)
+    # 将图像黑白化（灰度化）
+    gray_image = cv2.cvtColor(purple_masked_image, cv2.COLOR_BGR2GRAY)
+    output_path = 'ocr_detect.jpg'
+    cv2.imwrite(output_path, gray_image)
+    return gray_image
 
