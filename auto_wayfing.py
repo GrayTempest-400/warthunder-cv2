@@ -164,16 +164,7 @@ def ocr_digit(image_path):
 
 ###########################################################################
 
-
-
-point = 'point'
-init = {
-    point: 'A',
-}
-
-
-
-
+def find_way():
     while True:
         time.sleep(5)
         get_capture_zone()
@@ -196,10 +187,13 @@ init = {
             elif len(recognized_text) == 1:
                 speed = recognized_text[0]
             print({"速度": speed})
-            if speed == 0 and time.time > 5:  
+            if speed == 0 and int(time.time) > 5:
                 print("遇到障碍")
         except:
             print("获取速度失败")
         print(recognized_text)
+
+while True:
+    find_way()
 
 
