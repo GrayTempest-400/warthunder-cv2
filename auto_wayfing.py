@@ -173,42 +173,33 @@ init = {
 
 
 
-# 初始化
-# 查找名为'war thunder'的窗口
-window = gw.getWindowsWithTitle('War Thunder')[0]
 
+    while True:
+        time.sleep(5)
+        get_capture_zone()
+        get_Player()
+        x, y, dx, dy = get_Player()
 
-# 将窗口移动到左上角
-window.moveTo(0, 0)
+        xx, xy = get_capture_zone()  # 这里纯纯是面向答案搞得，假如有A,B两个点就ax, ay,bx,by ，假如只有A就ax,ay  假如ABC就ax,ay,bx,by,cx,cy
+        check_vector_pointing(x, y, dx, dy, xx,xy)  # 同理，找a点就check_vector_pointing(x, y, dx, dy, ax, ay)，找b就check_vector_pointing(x, y, dx, dy, bx, by)
+        print(check_vector_pointing(x, y, dx, dy, xx, xy))
+        try:
+            img = ImageGrab.grab((47, 686, 100, 702))  # 速度存在位置的坐标
+            img.save('speeds.png')
+            recognized_text = ocr_digit('speeds.png')
+            if len(recognized_text) == 2:
+                speed = recognized_text[0] + recognized_text[1]
+            elif len(recognized_text) == 3:
+                speed = recognized_text[0] + recognized_text[1] + recognized_text[2]
+            elif len(recognized_text) == 0:
+                speed = None
+            elif len(recognized_text) == 1:
+                speed = recognized_text[0]
+            print({"速度": speed})
+            if speed == 0 and time.time > 5:  
+                print("遇到障碍")
+        except:
+            print("获取速度失败")
+        print(recognized_text)
 
-# 获取窗口左下角的位置
-window_left_bottom = (window.left, window.bottom)
-print(window_left_bottom)
-
-while True:
-    time.sleep(5)
-    capture_zone = get_capture_zone()
-    x, y, dx, dy = get_Player()
-    xx, xy = capture_zone
-    check_vector_pointing(x, y, dx, dy, xx, xy)
-
-    try:
-        img = ImageGrab.grab((47, 686, 100, 702))  # 速度存在位置的坐标
-        img.save('speeds.png')
-        recognized_text = ocr_digit('speeds.png')
-        if len(recognized_text) == 2:
-            speed = recognized_text[0] + recognized_text[1]
-        elif len(recognized_text) == 3:
-            speed = recognized_text[0] + recognized_text[1] + recognized_text[2]
-        elif len(recognized_text) == 0:
-            speed = None
-        elif len(recognized_text) == 1:
-            speed = recognized_text[0]
-        print({"速度": speed})
-        if speed == 0 and time.time() > 5:
-            print("遇到障碍")
-    except:
-        print("获取速度失败")
-
-    print(recognized_text)
 
