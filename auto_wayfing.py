@@ -4,7 +4,10 @@ import pytesseract
 from PIL import Image,ImageGrab
 import time
 import pygetwindow as gw
+from key_input.press_key import InputKey
+from key_input import Mouse, Keyboard
 
+input_key = InputKey(0)
 
 #这是爬战区的
 def get_capture_zone():
@@ -138,13 +141,16 @@ def check_vector_pointing(x, y, dx, dy, ax, ay):
     if dot_product > 0 and math.isclose(angle, 0, abs_tol=1e-6):
         return True
     elif angle <= 5:
+        input_key.click_key(Keyboard.W, 3) #input_key.click_key(Keyboard.W, 3)中的3是按键秒数，可自行调整
         return "Go straight"
     else:
         angle_diff = math.atan2(dy, dx) - math.atan2(ay - y, ax - x)
         if angle_diff < 0:
+            input_key.click_key(Keyboard.D, 1)#input_key.click_key(Keyboard.D, 1)1是按键秒数，可自行调整
             return "Turn right"
 
         else:
+            input_key.click_key(Keyboard.A, 1)#input_key.click_key(Keyboard.D, 1)1是按键秒数，可自行调整
             return "Turn left"
 
 
@@ -164,16 +170,23 @@ def ocr_digit(image_path):
 
 ###########################################################################
 
+
+
+
+
+
+
+
 def find_way():
     while True:
-        time.sleep(5)
+
+
         get_capture_zone()
         get_Player()
         x, y, dx, dy = get_Player()
 
-        xx, xy = get_capture_zone()  # 这里纯纯是面向答案搞得，假如有A,B两个点就ax, ay,bx,by ，假如只有A就ax,ay  假如ABC就ax,ay,bx,by,cx,cy
-        check_vector_pointing(x, y, dx, dy, xx,xy)  # 同理，找a点就check_vector_pointing(x, y, dx, dy, ax, ay)，找b就check_vector_pointing(x, y, dx, dy, bx, by)
-        print(check_vector_pointing(x, y, dx, dy, xx, xy))
+        xx, xy = get_capture_zone()  
+        check_vector_pointing(x, y, dx, dy, xx,xy)  
         try:
             img = ImageGrab.grab((47, 686, 100, 702))  # 速度存在位置的坐标
             img.save('speeds.png')
@@ -188,12 +201,13 @@ def find_way():
                 speed = recognized_text[0]
             print({"速度": speed})
             if speed == 0 and int(time.time) > 5:
-                print("遇到障碍")
+                print("遇到障碍")#可自行写处理逻辑可仿input_key.click_key(Keyboard.D, 1)
         except:
             print("获取速度失败")
         print(recognized_text)
 
 while True:
     find_way()
+    
 
 
