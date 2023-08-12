@@ -9,6 +9,10 @@ from key_input import Mouse, Keyboard
 
 input_key = InputKey(0)
 
+speed_w = 'speed_w'
+init = {
+    speed_w:(1300, 504, 1377, 555),#速度的坐标（左上角x,左上角y，右下角x,右下角y)
+}
 #这是爬战区的
 def get_capture_zone():
     url = "http://127.0.0.1:8111/map_obj.json"
@@ -164,9 +168,46 @@ def ocr_digit(image_path):
 
     # 返回识别的数字文本
     return text.strip()
+##################################################################################################################
 
+def speed_detect():
+    speed_list = []  # 存储速度的列表
+    consecutive_below_one = 0  # 连续小于1的计数器
+    while True:
+        try:
+            time.sleep(1)
+            img = ImageGrab.grab(init[speed_w]) # 速度存在位置的坐标
+            img.save('speeds.png')
+            recognized_text = ocr_digit('speeds.png')
+            if len(recognized_text) == 2:
+                speed = int(recognized_text[0] + recognized_text[1])
+            elif len(recognized_text) == 3:
+                speed = int(recognized_text[0] + recognized_text[1] + recognized_text[2])
+            elif len(recognized_text) == 1:
+                speed = int(recognized_text[0])
 
+            if speed is not None:
+                speed_list.append(speed)
+                print({"速度": speed})
 
+                if speed < 3:           #当速度小于3开始计
+                    consecutive_below_one += 1
+                else:
+                    consecutive_below_one = 0
+
+                if consecutive_below_one >= 5:
+                    print("遇到障碍")
+                    input_key.click_key(Keyboard.S, 5) #自定义障碍处理
+                    input_key.click_key(Keyboard.A, 3)
+                    input_key.click_key(Keyboard.W, 2)
+                    consecutive_below_one = 0
+
+                if len(speed_list) > 120:
+                    speed_list = []  # 清空速度列表
+        except:
+            print("获取速度失败")
+
+        print(recognized_text)
 
 ###########################################################################
 
@@ -185,29 +226,10 @@ def find_way():
         get_Player()
         x, y, dx, dy = get_Player()
 
-        xx, xy = get_capture_zone()  
-        check_vector_pointing(x, y, dx, dy, xx,xy)  
-        try:
-            img = ImageGrab.grab((47, 686, 100, 702))  # 速度存在位置的坐标
-            img.save('speeds.png')
-            recognized_text = ocr_digit('speeds.png')
-            if len(recognized_text) == 2:
-                speed = recognized_text[0] + recognized_text[1]
-            elif len(recognized_text) == 3:
-                speed = recognized_text[0] + recognized_text[1] + recognized_text[2]
-            elif len(recognized_text) == 0:
-                speed = None
-            elif len(recognized_text) == 1:
-                speed = recognized_text[0]
-            print({"速度": speed})
-            if speed == 0 and int(time.time) > 5:
-                print("遇到障碍")#可自行写处理逻辑可仿input_key.click_key(Keyboard.D, 1)
-        except:
-            print("获取速度失败")
-        print(recognized_text)
-
-while True:
-    find_way()
-    
+        xx, xy = get_capture_zone()
+        check_vector_pointing(x, y, dx, dy, xx,xy)
 
 
+
+find_way()
+speed_detect()
