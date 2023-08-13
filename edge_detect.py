@@ -6,14 +6,20 @@ import keyboard
 from win32gui import FindWindow, SetWindowPos
 from win32con import HWND_TOPMOST, SWP_NOMOVE, SWP_NOSIZE
 
+from key_input.press_key import InputKey
+from key_input import Mouse, Keyboard
 
 
+input_key = InputKey(0)
 
+
+ads = 'ads'
 show = 'show'
 size = 'size'
 init = {
     show: True,  # 显示, Down
-    size: 200,  # 截图的尺寸, 屏幕中心截图周围大小
+    size: 150,  # 截图的尺寸, 屏幕中心截图周围大小
+    ads:1.2,# 移动倍数, 调整方式: 瞄准目标旁边并按住 Shift 键, 当准星移动到目标点的过程, 稳定精准快速不振荡时, 就找到了合适的 ADS 值
 }
 
 c = cx_cy()
@@ -46,34 +52,49 @@ def move(x: int, y: int):
 
 
 
+
+
 def loop():
+
     while True:
         if keyboard.is_pressed('h'):
             print("按下了'h'键，退出函数执行")
             break
 
-        capture_screen_around_centers(540)
+        capture_screen_around_centers(450)
         # 替换为您的图像文件路径
         image_path = 'detect_full.png'
         image = cv2.imread(image_path)
-        result_image, x, y = find_purple_points(image_path, target_point=(540, 540))
+        result_image, x, y = find_purple_points(image_path, target_point=(450, 450))
         if result_image is not None:
-            print(x, y)
-            px, py = get_coordinate(540, x, y)
-            print(px, py)
 
+            print(x, y)
+            px, py = get_coordinate(450, x, y)
+            print(px, py)
+            ax = int(px * init[ads])
+            ay = int(py * init[ads])
+            move(ax, ay)
+
+            input_key.click_key(Keyboard.X, 0.1)
+            time.sleep(0.5)
+            input_key.click_key(Keyboard.LSHIFT, 0.1)
             # 显示标记了最近紫色点的中心坐标的图像
             time.sleep(0.5)
             capture_screen_around_center(init[size])
             target, image1 = find_specific_purple_edges('detect.png', show=init[show]) #调用边缘检测求中心点
             if target is not None:
-                x, y = target
-                aim = get_coordinate(init[size], x, y)
-                x = aim[0]
-                y = aim[1]
+                x1, y1 = target
+                aim = get_coordinate(init[size], x1, y1)#转为屏幕坐标
+                px2 = aim[0]
+                py2 = aim[1]
                 time.sleep(0.5)
-                print(x, y)
-                cv2.line(image1, aim, (c[0], c[1]), (255, 255, 0), 2)   #画图
+                print(px2, py2)
+                bx = int(px2 * init[ads])
+                by = int(py2 * init[ads])
+                move(bx, by)
+
+                input_key.mouse_key_click(Mouse.MOUSE_LEFT)
+                time.sleep(0.4)
                 cv2.namedWindow('detect', cv2.WINDOW_AUTOSIZE)
                 im = cv2.resize(image1, (400, 400))
                 cv2.imshow('detect', im)
