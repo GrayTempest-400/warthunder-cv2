@@ -18,8 +18,8 @@ show = 'show'
 size = 'size'
 init = {
     show: True,  # 显示, Down
-    size: 150,  # 截图的尺寸, 屏幕中心截图周围大小
-    ads:1.2,# 移动倍数, 调整方式: 瞄准目标旁边并按住 Shift 键, 当准星移动到目标点的过程, 稳定精准快速不振荡时, 就找到了合适的 ADS 值
+    size: 200,  # 截图的尺寸, 屏幕中心截图周围大小
+    ads:0.5,# 移动倍数, 调整方式: 瞄准目标旁边并按住 Shift 键, 当准星移动到目标点的过程, 稳定精准快速不振荡时, 就找到了合适的 ADS 值
 }
 
 c = cx_cy()
@@ -40,19 +40,33 @@ except FileNotFoundError:
 def move(x: int, y: int):
     if (x == 0) & (y == 0):
         return
-    screen_width, screen_height = pyautogui.size()
-    center_x = screen_width // 2
-    center_y = screen_height // 2
+
+    center_x = 960 #要自行调整，数越大越靠右，越小越靠左    游戏特性无法更改  因为战雷鼠标不在屏幕中心点
+    center_y = 300#要自行调整，数越大越靠上，越小越靠下
+
+    print(center_x,center_y)
+
 
     # 计算屏幕中心到目标点的相对位移
     x_offset = x - center_x
     y_offset = y - center_y
-    driver.moveR(int(x_offset), int(y_offset), True)
+    print(int(x_offset), int(y_offset))
+    input_key.mouse_move(x_offset, y_offset)
 
 
+def move1(x: int, y: int):
+    if (x == 0) & (y == 0):
+        return
+    screen_width, screen_height = pyautogui.size()
+    center_x = 960
+    center_y = 540
 
 
-
+    # 计算屏幕中心到目标点的相对位移
+    x_offset = x - center_x
+    y_offset = y - center_y
+    print(x_offset, y_offset)
+    driver.moveR(int(x_offset), int(y_offset),True)
 
 def loop():
 
@@ -67,13 +81,8 @@ def loop():
         image = cv2.imread(image_path)
         result_image, x, y = find_purple_points(image_path, target_point=(450, 450))
         if result_image is not None:
-
-            print(x, y)
             px, py = get_coordinate(450, x, y)
-            print(px, py)
-            ax = int(px * init[ads])
-            ay = int(py * init[ads])
-            move(ax, ay)
+            move(px, py)
 
             input_key.click_key(Keyboard.X, 0.1)
             time.sleep(0.5)
@@ -89,12 +98,11 @@ def loop():
                 py2 = aim[1]
                 time.sleep(0.5)
                 print(px2, py2)
-                bx = int(px2 * init[ads])
-                by = int(py2 * init[ads])
-                move(bx, by)
 
+                move1(px2, py2)
+                print("完成循环")
                 input_key.mouse_key_click(Mouse.MOUSE_LEFT)
-                time.sleep(0.4)
+                time.sleep(1)
                 cv2.namedWindow('detect', cv2.WINDOW_AUTOSIZE)
                 im = cv2.resize(image1, (400, 400))
                 cv2.imshow('detect', im)
