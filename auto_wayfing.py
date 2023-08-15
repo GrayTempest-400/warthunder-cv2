@@ -230,8 +230,10 @@ def find_map():
         get_capture_zone()
         get_Player()
         x, y, dx, dy = get_Player()
-        check_vector_pointing(x, y, dx, dy, mx,my)
-        check_vector_pointing(x, y, dx, dy, mx2, my2)
+        a = check_vector_pointing(x, y, dx, dy, mx,my)
+        if a is None :      #当第一个点执行完后执行第二个
+            check_vector_pointing(x, y, dx, dy, mx2, my2)
+
     ###########################################################################
 
 def find_way():
@@ -244,7 +246,9 @@ def find_way():
 
         xx, xy = get_capture_zone()
 
-        check_vector_pointing(x, y, dx, dy, xx,xy)       #xx,xy可更换为自定义路径点如（0.123456,0.114514)
+        b = check_vector_pointing(x, y, dx, dy, xx,xy)       #xx,xy可更换为自定义路径点如（0.123456,0.114514)
+        if b is None:
+           break
 
 
 threads = []
