@@ -6,12 +6,14 @@ import time
 import pygetwindow as gw
 from key_input.press_key import InputKey
 from key_input import Mouse, Keyboard
+import threading
+import ctypes
 
 input_key = InputKey(0)
 
 speed_w = 'speed_w'
 init = {
-    speed_w:(1300, 504, 1377, 555),#速度的坐标（左上角x,左上角y，右下角x,右下角y)
+    speed_w:(58, 1043, 81, 1065),#速度的坐标（左上角x,左上角y，右下角x,右下角y)
 }
 #这是爬战区的
 def get_capture_zone():
@@ -134,14 +136,16 @@ def get_Player():
 ###############################################################################################################
 
 
-def check_vector_pointing(x, y, dx, dy, ax, ay):
+def check_vector_pointing(x, y, dx, dy, ax, ay):          #这是获取车辆和对目标点的向量的，ax,ay可传入自定义路径点
     dx_AB = ax - x
     dy_AB = ay - y
 
     dot_product = dx * dx_AB + dy * dy_AB
 
     angle = math.degrees(math.acos(dot_product / (math.sqrt(dx**2 + dy**2) * math.sqrt(dx_AB**2 + dy_AB**2))))
-
+    distance_to_target = math.sqrt((ax - x) ** 2 + (ay - y) ** 2)
+    if distance_to_target < 0.0001:
+        return None
     if dot_product > 0 and math.isclose(angle, 0, abs_tol=1e-6):
         return True
     elif angle <= 5:
@@ -197,9 +201,11 @@ def speed_detect():
 
                 if consecutive_below_one >= 5:
                     print("遇到障碍")
+                    ctypes.windll.kernel32.Beep(1000,50)
                     input_key.click_key(Keyboard.S, 5) #自定义障碍处理
-                    input_key.click_key(Keyboard.A, 3)
-                    input_key.click_key(Keyboard.W, 2)
+                    input_key.click_key(Keyboard.D, 5)
+                    input_key.click_key(Keyboard.W, 5)
+
                     consecutive_below_one = 0
 
                 if len(speed_list) > 120:
@@ -209,14 +215,24 @@ def speed_detect():
 
         print(recognized_text)
 
+
 ###########################################################################
-
-
-
-
-
-
-
+import pytesseract
+def find_map():
+    input_key.click_key(Keyboard.M, 10)#按M键10秒
+    image = ImageGrab.grab((0,0,305,37))
+    ocr_result = pytesseract.image_to_string(image, lang='cn')
+    map = []
+    map.append(ocr_result)
+    if map == "你的自定义点所在的地图":
+        mx,my = 0.114,0.514#自定义路径点
+        mx2,my2 = 0.114,0.514#自定义路径点 可以此类推
+        get_capture_zone()
+        get_Player()
+        x, y, dx, dy = get_Player()
+        check_vector_pointing(x, y, dx, dy, mx,my)
+        check_vector_pointing(x, y, dx, dy, mx2, my2)
+    ###########################################################################
 
 def find_way():
     while True:
@@ -227,9 +243,19 @@ def find_way():
         x, y, dx, dy = get_Player()
 
         xx, xy = get_capture_zone()
-        check_vector_pointing(x, y, dx, dy, xx,xy)
+
+        check_vector_pointing(x, y, dx, dy, xx,xy)       #xx,xy可更换为自定义路径点如（0.123456,0.114514)
 
 
+threads = []
 
-find_way()
-speed_detect()
+t1 = threading.Thread(target=speed_detect)
+threads.append(t1)
+t2 = threading.Thread(target=find_way)
+threads.append(t2)
+if __name__=='__main__':
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+print ("退出线程")
