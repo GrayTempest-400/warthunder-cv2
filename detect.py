@@ -67,21 +67,9 @@ def extract_text_from_image(image_path):
 #image_file_path = '111.jpg'
 #extracted_data = extract_text_from_image(image_file_path)
 #print(extracted_data)
-def cx_cy():
 
-    root = tk.Tk()
-    screen_width = root.winfo_screenwidth()
-    screen_height = root.winfo_screenheight()
-    root.destroy()
-
-    center_x = screen_width // 2
-    center_y = screen_height // 2
-
-    cx, cy = center_x, center_y
-
-    return cx, cy
 def get_coordinate(size ,x,y):
-    a = cx_cy()
+    a = (643,377)
     # 假设原始图像在屏幕中的位置和大小，以及检测得到的图像中心点坐标
     screen_center_x  , screen_center_y = a[0], a[1]
     image_width = size   # 图像的宽度
@@ -105,7 +93,7 @@ def find_purple_points(image_path, target_point=(960, 540)):
     hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
     # 定义紫色的HSV范围
-    lower_purple = np.array([130, 55, 55])
+    lower_purple = np.array([135, 55, 55])
     upper_purple = np.array([160, 255, 255])
 
     # 提取紫色区域
@@ -130,16 +118,12 @@ def find_purple_points(image_path, target_point=(960, 540)):
     # 找到距离给定点最近的紫色点的中心坐标
     nearest_point = min(purple_points, key=lambda p: np.linalg.norm(np.array(p) - np.array(target_point)))
 
-    x, y = nearest_point[0], nearest_point[1] + 15
+    x, y = nearest_point[0], nearest_point[1]
     # 在图像上绘制红色圆点标记
     cv2.circle(image, (x, y), 5, (0, 0, 255), -1)
 
     return image, x, y
 # 替换为您的图像文件路径
-image_path = 'tt2.png'
-result_image,x,y = find_purple_points(image_path, target_point=(960, 540))
-if result_image is not None:
-    print(x, y)
 
 
 
@@ -161,7 +145,7 @@ def find_specific_purple_edges(image_path, show):
     hsv_img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
     # 定义紫色的HSV范围
-    lower_purple = np.array([130, 55, 55])
+    lower_purple = np.array([135, 55, 55])
     upper_purple = np.array([160, 255, 255])
     # 创建紫色掩膜
     purple_mask = cv2.inRange(hsv_img, lower_purple, upper_purple)
@@ -321,37 +305,11 @@ def on_mouse_move(event, x, y, flags, param):
                     break
 
 
-def get_screen_info():
-    root = tk.Tk()
-    screen_width = root.winfo_screenwidth()
-    screen_height = root.winfo_screenheight()
-    root.destroy()
 
-    center_x = screen_width // 2
-    center_y = screen_height // 2
 
-    return {
-        "screen_width": screen_width,
-        "screen_height": screen_height,
-        "center_x": center_x,
-        "center_y": center_y
-    }
-def cx_cy():
-
-        root = tk.Tk()
-        screen_width = root.winfo_screenwidth()
-        screen_height = root.winfo_screenheight()
-        root.destroy()
-
-        center_x = screen_width // 2
-        center_y = screen_height // 2
-
-        cx,cy = center_x,center_y
-
-        return cx,cy
 def capture_screen_around_center(s):
-    screen_info = get_screen_info()
-    center_x, center_y = screen_info['center_x'], screen_info['center_y']
+
+    center_x, center_y = 644 , 377
     left = center_x - s
     top = center_y - s
     right = center_x + s
@@ -364,8 +322,8 @@ def capture_screen_around_center(s):
 
 
 def capture_screen_around_centers(s):
-    screen_info = get_screen_info()
-    center_x, center_y = screen_info['center_x'], screen_info['center_y']
+
+    center_x, center_y = 643 , 377
     left = center_x - s
     top = center_y - s
     right = center_x + s
