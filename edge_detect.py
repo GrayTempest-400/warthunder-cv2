@@ -18,19 +18,19 @@ size = 'size'
 size_point = 'size_point'
 init = {
     show: True,  # 显示, Down
-    size: 200,  # 截图的尺寸, 屏幕中心截图周围大小
-    size_point: 450,
+    size: 250//2, # 截图的尺寸, 屏幕中心截图周围大小
+    size_point: 450//2,
 
 }
 
-c = cx_cy()
+
 
 def move(x: int, y: int):      #不开镜模式下鼠标移动
     if (x == 0) & (y == 0):
         return
 
-    center_x = 960 #要自行调整，数越大越靠右，越小越靠左    游戏特性无法更改  因为战雷鼠标不在屏幕中心点
-    center_y = 300#要自行调整，数越大越靠上，越小越靠下
+    center_x = 643 #要自行调整，数越大越靠右，越小越靠左    游戏特性无法更改  因为战雷鼠标不在屏幕中心点
+    center_y = 230#要自行调整，数越大越靠上，越小越靠下
 
     print(center_x,center_y)
 
@@ -45,9 +45,9 @@ def move(x: int, y: int):      #不开镜模式下鼠标移动
 def move1(x: int, y: int):    #开镜模式下鼠标移动
     if (x == 0) & (y == 0):
         return
-    screen_width, screen_height = pyautogui.size()
-    center_x = screen_width // 2
-    center_y = screen_height // 2
+
+    center_x = 643
+    center_y = 380
 
     # 计算屏幕中心到目标点的相对位移
     x_offset = x - center_x
@@ -76,35 +76,43 @@ def loop():      #主函数
             # 显示标记了最近紫色点的中心坐标的图像
             time.sleep(0.5)
             #开镜后处理
-            capture_screen_around_center(init[size])#截图
-            target, image1 = find_specific_purple_edges('detect.png', show=init[show]) #调用边缘检测求中心点
-            if target is not None:
-                x1, y1 = target
-                aim = get_coordinate(init[size], x1, y1)#转为屏幕坐标
-                px2 = aim[0]
-                py2 = aim[1]
-                time.sleep(0.5)
-                print(px2, py2)
-                move1(px2, py2)                          #移动
-                print("完成循环")
-                input_key.mouse_key_click(Mouse.MOUSE_LEFT)      #开火
-                time.sleep(1)
-                input_key.click_key(Keyboard.LSHIFT, 0.1)        #关镜
-                #显示
+            result_image, x, y = find_purple_points(image_path,target_point=(init[size_point], init[size_point]))  # 找离屏幕中心最近的紫色点
+            px1, py1 = get_coordinate(init[size_point], x, y)
+            move1(px1, py1)
+            while True:
+                 capture_screen_around_center(init[size])#截图
+                 target, image1 = find_specific_purple_edges('detect.png', show=init[show]) #调用边缘检测求中心点
+                 if target is not None:
+                     x1, y1 = target
+                     aim = get_coordinate(init[size], x1, y1)#转为屏幕坐标
+                     px2 = aim[0]
+                     py2 = aim[1]
+                     time.sleep(0.5)
+                     print(px2, py2)
+                     move1(px2, py2)                          #移动
 
-                if init[show] == True :
-                   cv2.namedWindow('detect', cv2.WINDOW_AUTOSIZE)
-                   im = cv2.resize(image1, (400, 400))
-                   cv2.imshow('detect', im)
-                   SetWindowPos(FindWindow(None, 'detect'), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE)
-                   cv2.waitKey(1)
-            else:
-                # 显示
-                if init[show] == True:
-                   resized_img = cv2.resize(result_image, (400, 400))
-                   cv2.imshow('detect', resized_img)
-                   SetWindowPos(FindWindow(None, 'detect'), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE)
-                   cv2.waitKey(1)
+                     input_key.mouse_key_click(Mouse.MOUSE_LEFT)      #开火
+                     time.sleep(1)
+
+                     #显示
+                 if target is None:
+                     input_key.click_key(Keyboard.LSHIFT, 0.1)
+                     print("完成循环")
+                     break
+
+                 if init[show] == True :
+                    cv2.namedWindow('detect', cv2.WINDOW_AUTOSIZE)
+                    im = cv2.resize(image1, (400, 400))
+                    cv2.imshow('detect', im)
+                    SetWindowPos(FindWindow(None, 'detect'), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE)
+                    cv2.waitKey(1)
+                 else:
+                     # 显示
+                     if init[show] == True:
+                        resized_img = cv2.resize(result_image, (400, 400))
+                        cv2.imshow('detect', resized_img)
+                        SetWindowPos(FindWindow(None, 'detect'), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE)
+                        cv2.waitKey(1)
         else:
                 #显示
             print("未能找到目标")
@@ -114,5 +122,4 @@ def loop():      #主函数
                 SetWindowPos(FindWindow(None, 'detect'), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE)
                 cv2.waitKey(1)
 
-while True:
-    loop()
+loop()
