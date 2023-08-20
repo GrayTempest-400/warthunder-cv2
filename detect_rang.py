@@ -11,7 +11,6 @@ import time
 import pandas as pd
 import cv2
 import numpy as np
-from edge_detect import init
 
 
 center_point = 'center_point'
@@ -336,9 +335,19 @@ def range_detect():
         print(range_value, Ruler_value)
         if abs(range_value - Ruler_value) < 50:
             return True  # 停止比较
+        elif range_value - Ruler_value > 300:                #
+            s = (range_value - Ruler_value) // 100
+            s = int(s)  # 将s转换为整数
+            print("大距离上调")
+            input_key.click_key(Keyboard.T, init[ranging_speed] * s)
         elif range_value > Ruler_value:
             print("上调")
             input_key.click_key(Keyboard.T, init[ranging_speed])
+        elif Ruler_value - range_value > 300:                #
+            s = (range_value - Ruler_value) // 100
+            s = int(s)  # 将s转换为整数
+            print("大距离下调")
+            input_key.click_key(Keyboard.T, init[ranging_speed] * s)
         else:
             print("下调")
             input_key.click_key(Keyboard.U, init[ranging_speed]//2)
