@@ -51,7 +51,7 @@ https://www.bilibili.com/video/BV1M841127RG/
 - 其他 ： 依赖文件或无用文件
 
 可通过修改auto_wayfing内数据信息根据地图自定义路径点
-
+演示及教学视频：https://www.youtube.com/watch?v=RLXhALLaQnY
 本脚本还不完善，欢迎补充完善
 
 1、  本脚本不能后台点击，挂机期间不能操作其他游戏或软件，建议在虚拟机挂机，以防止影响主机上的其他操作
