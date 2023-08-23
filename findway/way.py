@@ -64,29 +64,29 @@ def check_vector_pointing(x, y, dx, dy, ax, ay):  # 这是获取车辆和对目�
             #input_key.click_key(Keyboard.A, 1)  # input_key.click_key(Keyboard.D, 1)1是按键秒数，可自行调整
             print( "Turn left")
 import time
+def way(json_file ):
+
+   # 从 JSON 文件中读取数据
+   with open('player_data.json', 'r') as json_file:
+       data_list = json.load(json_file)
+
+   current_index = 0  # 用于跟踪当前字典的索引
+   print("路径点总数为",len(data_list))
+   while current_index < len(data_list):
+       time.sleep(1)
+       print("读取数据")
+       data = data_list[current_index]
+       ax = data["x"]
+       ay = data["y"]
+       dx = data["dx"]
+       dy = data["dy"]
 
 
-# 从 JSON 文件中读取数据
-with open('player_data.json', 'r') as json_file:
-    data_list = json.load(json_file)
+       a = get_Player()
+       result = check_vector_pointing(a[0], a[1], dx, dy, ax, ay)  # 将 x 和 y 作为 ax 和 ay 传入函数
 
-current_index = 0  # 用于跟踪当前字典的索引
-print("路径点总数为",len(data_list))
-while current_index < len(data_list):
-    time.sleep(1)
-    print("读取数据")
-    data = data_list[current_index]
-    ax = data["x"]
-    ay = data["y"]
-    dx = data["dx"]
-    dy = data["dy"]
-
-
-    a = get_Player()
-    result = check_vector_pointing(a[0], a[1], dx, dy, ax, ay)  # 将 x 和 y 作为 ax 和 ay 传入函数
-
-    if result == True:
-        current_index += 1  # 如果函数返回 True，前进到下一个字典
-        print(f"已到达路径点{current_index}")
-    else:
-        continue  # 如果函数返回其他结果，继续循环
+       if result == True:
+           current_index += 1  # 如果函数返回 True，前进到下一个字典
+           print(f"已到达路径点{current_index}")
+       else:
+           continue  # 如果函数返回其他结果，继续循环
