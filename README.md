@@ -63,3 +63,7 @@ https://www.bilibili.com/video/BV1M841127RG/
 7、  敌人颜色设置成紫色
 运行UI.py点击run后，软件将开始挂机
 
+
+寻路点创建教程：https://www.bilibili.com/video/BV1n8411Q7gB/
+运行create.py进行创建，way.py进行寻路
+
